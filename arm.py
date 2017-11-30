@@ -58,15 +58,42 @@ def decode(address, instruction):
 			exit()
 		opcode = instruction[8:]
 		opcode = int(opcode,2)
-		if opcode == 0x6b and register[0] == 1:
+		if opcode == 0x6b and register[0] == 1: # print integer
+			print "DECODE: Operation is SWI to print an integer to a file"
+			print "Read registers: R0 = {0}. R1 = {1}".format(register[0], register[1])
+			print "EXECUTE: Write {1} to file with FD {0}".format(regsiter[0], register[1])
 			print register[1]
-		elif opcode == 0x6c and register[0] == 0:
+			print "MEMORY: No memory operation"
+			print "WRITEBACK: No writeback operation"
+		elif opcode == 0x6c and register[0] == 0: # input integer
+			print "DECODE: Operation is SWI to read an integer from a file"
+			print "Read registers: R0 = {0}".format(register[0])
+			print "EXECUTE: Read an integer from file with FD {0}".format(register[0])
 			register[0] = input()
-		elif opcode == 0x69 and register[0] == 1:
+			print "MEMORY: No memory operation"
+			print "WRITEBACK: Write {0} to R0".format(register[0])
+		elif opcode == 0x69 and register[0] == 1: #print string
+			print "DECODE: Operation is SWI to write a string to a file"
+			print "Read registers: R0 = {0}. R1 = {1}".format(register[0], register[1])
+			print "EXECUTE: Write {1} to file with FD {0}".format(regsiter[0], memory[register[1]])
 			print memory[register[1]]
-		elif opcode == 0x6a and register[0] ==0:
+			print "MEMORY: No memory operation"
+			print "WRITEBACK: No writeback operation"
+		elif opcode == 0x6a and register[0] ==0: # read string
+			print "DECODE: Operation is SWI to read a String from a file"
+			print "Read registers: R0 = {0}. R1 = {1}. R2 = {2}".format(register[0], register[1], register[2])
+			print "EXECUTE: Read {0} bytes from file with fd {1} and write to memory location {2}".format(register[2], register[0], register[1])
 			memory[register[1]] = raw_input()
-			memory[register[1]] = memory[register[1]][:register[2]]
+			if len(memory[register[1]]) > register[2]:
+				memory[register[1]] = memory[register[1]][:register[2]]
+				register[0] = register[2]
+				print "MEMORY: Access memory adress {0} to store {1}".format(register[1], memory[register[1]])
+				print "WRITEBACK: R0 = {0}".format(register[0])
+			else:
+				register[0] = len(memory[register[1]])
+				print "MEMORY: Access memory adress {0} to store {1}".format(register[1], memory[register[1]])
+				print "WRITEBACK: R0 = {0}".format(register[0])
+			
 
 
 		register[15]+=4
